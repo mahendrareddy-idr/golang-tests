@@ -26,7 +26,7 @@ func main() {
 		outputFile = os.Args[2]
 	}
 
-	movies, err := gettelugumovies(sourceURL)
+	movies, err := getBranchAMovies(sourceURL)
 	if err != nil {
 		fmt.Println("Failed to fetch release data:", err)
 		os.Exit(1)
@@ -46,6 +46,10 @@ func main() {
 	for _, movie := range movies {
 		fmt.Println("- " + movie)
 	}
+}
+
+func getBranchAMovies(sourceURL string) ([]string, error) {
+	return gettelugumovies(sourceURL)
 }
 
 func gettelugumovies(sourceURL string) ([]string, error) {
