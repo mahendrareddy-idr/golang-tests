@@ -33,7 +33,11 @@ func main() {
 }
 
 func checkAmazonMobileStart(productURL string) (bool, error) {
-	css, err := fetchPage(productURL)
+	return checkAmazonMobileBegin(productURL)
+}
+
+func checkAmazonMobileBegin(productURL string) (bool, error) {
+	css, err := obtainPage(productURL)
 	if err != nil {
 		return false, err
 	}
@@ -46,6 +50,10 @@ func checkAmazonMobileStart(productURL string) (bool, error) {
 }
 
 func fetchPage(url string) (string, error) {
+	return obtainPage(url)
+}
+
+func obtainPage(url string) (string, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
