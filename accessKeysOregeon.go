@@ -53,7 +53,7 @@ func main() {
 		var wg sync.WaitGroup
 
 		for i := 0; i < 2; i++ {
-			wg.Add(1)
+			//wg.Add(1)
 			go sendReq(&wg, count*2+i)
 		}
 
