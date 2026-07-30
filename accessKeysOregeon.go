@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
+	"sync"
 )
 
 const (
-	url1         = "https://api.idrivee2.com/api/access_key/add"
-	bearerToken1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDNkODM0ZTQtMzE3MC0xMWYxLTkxNzQtN2NjMjU1ZTUxM2UyIiwiYWRtaW4iOnRydWUsInB1c2VyX2lkIjpudWxsLCJyZXNlbGxlciI6ZmFsc2UsIm1mYV9uYW1lIjpudWxsLCJtZmFfdHlwZSI6bnVsbCwiYWRtaW5faWQiOm51bGwsImlzX3N1YnVzZXJfYWRtaW4iOm51bGwsImhvc3QiOiJjb25zb2xlLmlkcml2ZWUyLmNvbSIsImlhdCI6MTc3NTY0MDMzMCwiZXhwIjoxNzc1NjQwNjMwLCJhdWQiOiJlMi5hcHMuaWRyaXZlIiwiaXNzIjoiZTIuYXBzLmlkcml2ZSIsImp0aSI6ImM4NWEzNjRmLTNkYTMtNWMxYi04ODMyLTFjODlkNTlhMjdiZiJ9.XqVfjQEYczL7u7vKhCc8LmcN5Cq1EDYjKoZOf4Zymvk" // Replace with your actual token
+	url1           = "https://api.idrivee2.com/api/access_key/add"
+	bearerTokenAlt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYmI0OTczZTUtODUzNy0xMWVmLWIxNTgtM2NlY2VmN2NjYTE0IiwiYWRtaW4iOnRydWUsInB1c2VyX2lkIjpudWxsLCJyZXNlbGxlciI6ZmFsc2UsImlhdCI6MTc0ODkzNDUzNiwiZXhwIjoxNzQ4OTM0ODM2LCJhdWQiOiJlMi5hcHMuaWRyaXZlIiwiaXNzIjoiZTIuYXBzLmlkcml2ZSIsImp0aSI6ImE2ZTg5NWFlLTY4OTAtNTQwNy05YTU4LTQ1ZWM5OGFhZDM5MyJ9.T4e9Js4euAYu6x69T-1-Ej0kxLZTkb_3EzmZzRcTtmc"
 )
 
 var jsonPayLoad1 = []byte(`{
@@ -23,10 +23,8 @@ var jsonPayLoad1 = []byte(`{
 	"expiry_on":null
 }`)
 
-// {"name":"sdds","rdns":"h3v1.or8.idrivee2-73.com","permissions":2,"disable_delete_object":false,"disable_delete_version":false,"disable_delete_bucket":false,"expiry_onL":null}
-// func sendReq(wg *sync.WaitGroup, id int) {
-func sendReq(id int) {
-	//defer wg.Done()
+func sendReq(wg *sync.WaitGroup, id int) {
+	defer wg.Done()
 
 	req, err := http.NewRequest("PUT", url1, bytes.NewBuffer(jsonPayLoad1))
 	if err != nil {
@@ -34,7 +32,7 @@ func sendReq(id int) {
 		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+bearerToken1)
+	req.Header.Set("Authorization", "Bearer "+bearerTokenAlt)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -50,16 +48,13 @@ func sendReq(id int) {
 }
 
 func main() {
-	//wg := &sync.WaitGroup{} // ✅ Initialize properly
+	var wg sync.WaitGroup
 
-	//for i := 0; i <= 1; i++ {
-	i := 0
-	//wg.Add(1)
-	//go sendReq(wg, i)
-	go sendReq(i)
-	time.Sleep(1 * time.Second) // Optional delay
-	//}
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go sendReq(&wg, i)
+	}
 
-	//wg.Wait()
+	wg.Wait()
 	fmt.Println("All requests completed")
 }
