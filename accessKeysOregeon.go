@@ -48,13 +48,17 @@ func sendReq(wg *sync.WaitGroup, id int) {
 }
 
 func main() {
-	var wg sync.WaitGroup
+	count := 0
+	for count < 5 {
+		var wg sync.WaitGroup
 
-	for i := 0; i < 2; i++ {
-		wg.Add(1)
-		go sendReq(&wg, i)
+		for i := 0; i < 2; i++ {
+			wg.Add(1)
+			go sendReq(&wg, count*2+i)
+		}
+
+		wg.Wait()
+		fmt.Printf("Batch %d completed\n", count+1)
+		count++
 	}
-
-	wg.Wait()
-	fmt.Println("All requests completed")
 }
