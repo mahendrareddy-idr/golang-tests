@@ -58,7 +58,7 @@ func main() {
 		}
 
 		wg.Wait()
-		fmt.Printf("Batch %d completed\n", count+1)
+		//fmt.Printf("Batch %d completed\n", count+1)
 		count++
 	}
 }
