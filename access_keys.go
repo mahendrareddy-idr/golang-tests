@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-const (
+//const (
 	url         = "https://api.idrivee2.com/api/access_key/add"
 	bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDNkODM0ZTQtMzE3MC0xMWYxLTkxNzQtN2NjMjU1ZTUxM2UyIiwiYWRtaW4iOnRydWUsInB1c2VyX2lkIjpudWxsLCJyZXNlbGxlciI6ZmFsc2UsIm1mYV9uYW1lIjpudWxsLCJtZmFfdHlwZSI6bnVsbCwiYWRtaW5faWQiOm51bGwsImlzX3N1YnVzZXJfYWRtaW4iOm51bGwsImhvc3QiOiJjb25zb2xlLmlkcml2ZWUyLmNvbSIsImlhdCI6MTc3NTY0MDcxNSwiZXhwIjoxNzc1NjQxMDE1LCJhdWQiOiJlMi5hcHMuaWRyaXZlIiwiaXNzIjoiZTIuYXBzLmlkcml2ZSIsImp0aSI6ImM4NWEzNjRmLTNkYTMtNWMxYi04ODMyLTFjODlkNTlhMjdiZiJ9.GLM0ZbdQp87uPFNd2iVhMnVzNvNWh84u4XkLAJgXArw"
-)
+//)
 
 var jsonPayLoad = []byte(`{
 "name":"123",
