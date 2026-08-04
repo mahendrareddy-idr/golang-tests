@@ -1,0 +1,190 @@
+package main
+
+import (
+	"bytes"
+	"crypto/tls"
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"strconv"
+	"sync"
+	"time"
+)
+
+const (
+	proxmoxURL  = "https://192.168.1.210:8006/api2/json"
+	node        = "pve"
+	tokenID     = "root@pam!prodqa"
+	tokenSecret = "e25e44ca-34e9-4676-9b40-5ba07b706311"
+	storage     = "vmstorage6tb"
+	bridge      = "vmbr0"
+
+	vmCount = 10
+	isoPath = "local:iso/Win_Pro_10_21H1_64Bit.ISO"
+)
+
+// Proxmox next ID response
+type NextIDResponse struct {
+	Data string `json:"data"`
+}
+
+// 🔹 Get next available VMID
+func getNextVMID() (int, error) {
+	url := proxmoxURL + "/cluster/nextid"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", fmt.Sprintf("PVEAPIToken=%s=%s", tokenID, tokenSecret))
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	var result NextIDResponse
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return 0, err
+	}
+
+	vmid, err := strconv.Atoi(result.Data)
+	if err != nil {
+		return 0, err
+	}
+
+	return vmid, nil
+}
+
+// 🔹 Create VM
+func createVM(vmid int, name string, mac string) error {
+	urlAPI := fmt.Sprintf("%s/nodes/%s/qemu", proxmoxURL, node)
+
+	form := url.Values{}
+	form.Add("vmid", fmt.Sprintf("%d", vmid))
+	form.Add("name", name)
+	form.Add("cores", "2")
+	form.Add("sockets", "1")
+	form.Add("memory", "4096") // 4GB RAM
+	form.Add("scsihw", "virtio-scsi-pci")
+	form.Add("scsi0", fmt.Sprintf("%s:50,format=qcow2", storage)) // 50GB disk
+	form.Add("ide2", fmt.Sprintf("%s,media=cdrom", isoPath))
+	form.Add("boot", "order=ide2;scsi0")
+	form.Add("bootdisk", "scsi0")
+	form.Add("net0", fmt.Sprintf("virtio=%s,bridge=%s", mac, bridge))
+
+	req, err := http.NewRequest("POST", urlAPI, bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("PVEAPIToken=%s=%s", tokenID, tokenSecret))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		return fmt.Errorf("VM %d failed: %s - %s", vmid, resp.Status, buf.String())
+	}
+
+	fmt.Printf("✅ Cloned VM %d\n", vmid)
+	return nil
+}
+
+// 🔹 Start VM
+func startVM(vmid int) {
+	url := fmt.Sprintf("%s/nodes/%s/qemu/%d/status/start", proxmoxURL, node, vmid)
+
+	req, _ := http.NewRequest("POST", url, nil)
+	req.Header.Set("Authorization", fmt.Sprintf("PVEAPIToken=%s=%s", tokenID, tokenSecret))
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err == nil && resp.StatusCode == 200 {
+		fmt.Printf("🚀 VM %d started\n", vmid)
+	} else {
+		fmt.Printf("⚠️ Failed to start VM %d\n", vmid)
+	}
+}
+
+// 🔹 Generate random MAC address
+func randomMAC() string {
+	rand.Seed(time.Now().UnixNano())
+	mac := []byte{0x52, 0x54, 0x00, byte(rand.Intn(256)), byte(rand.Intn(256)), byte(rand.Intn(256))}
+	return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
+		mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
+}
+
+func main() {
+	startID, err := getNextVMID()
+	if err != nil {
+		fmt.Println("Error getting VMID:", err)
+		return
+	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < vmCount; i++ {
+		wg.Add(1)
+
+		go func(i int) {
+			defer wg.Done()
+			vmid := startID + i
+			name := fmt.Sprintf("auto-vm-%d", vmid)
+			mac := randomMAC()
+
+			err := createVM(vmid, name, mac)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// Wait for VM config to be available
+			for j := 0; j < 10; j++ {
+				time.Sleep(2 * time.Second)
+				// Check if VM config exists
+				checkURL := fmt.Sprintf("%s/nodes/%s/qemu/%d/config", proxmoxURL, node, vmid)
+				req, _ := http.NewRequest("GET", checkURL, nil)
+				req.Header.Set("Authorization", fmt.Sprintf("PVEAPIToken=%s=%s", tokenID, tokenSecret))
+				client := &http.Client{
+					Transport: &http.Transport{
+						TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+					},
+				}
+				resp, _ := client.Do(req)
+				if resp != nil && resp.StatusCode == 200 {
+					resp.Body.Close()
+					startVM(vmid)
+					return
+				}
+			}
+			fmt.Printf("⚠️ Config wait error: VM %d not available after waiting\n", vmid)
+		}(i)
+	}
+
+	wg.Wait()
+	fmt.Println("All VM operations completed.")
+}

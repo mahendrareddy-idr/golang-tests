@@ -1,0 +1,18 @@
+format_version = 1
+
+[remotes.origin]
+type = "Merget"
+path = "mahendra-reddy/golang-tests"
+repo_id = "c7471f57-e555-40e5-88e4-a01d2e92d00d"
+
+[excludes]
+paths = [".claude/settings.json", ".claude/settings.local.json", ".codex/hooks.json", ".codex/config.toml", ".cursor/hooks.json", ".copilot/hooks/merget.json", ".copilot/settings.json"]
+
+[data_use]
+
+[license]
+
+[historian]
+enabled = true
+
+[ignore]
