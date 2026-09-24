@@ -49,6 +49,10 @@ func main() {
 }
 
 func getBranchAMovies(sourceURL string) ([]string, error) {
+	return gettelugumovies(sourceURL)
+}
+
+func gettelugumovies(sourceURL string) ([]string, error) {
 	html, err := fetchWebPage(sourceURL)
 	if err != nil {
 		return nil, err
