@@ -25,9 +25,15 @@ func main() {
 	client := &http.Client{Timeout: 30 * time.Second}
 
 	for i := 0; i <= 100; i++ {
+		keyName := fmt.Sprintf("100-%d", i)
+		if keyName == "100-1" {
+			fmt.Println("Stopping execution at key name:", keyName)
+			return
+		}
+
 		//preparing request body
 		body := map[string]interface{}{
-			"name":                   fmt.Sprintf("100-%d", i),
+			"name":                   keyName,
 			"subuser_id":             "6be455ff-b99a-11f0-9174-7cc255e513e2",
 			"rdns":                   "u4c4.or.idrivee2-50.com",
 			"permissions":            2,
