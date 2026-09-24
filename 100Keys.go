@@ -23,11 +23,20 @@ func main() {
 	defer file.Close()
 
 	client := &http.Client{Timeout: 30 * time.Second}
+	previouslyCreatedKeys := map[string]struct{}{
+		"100-1": {},
+	}
 
 	for i := 0; i <= 100; i++ {
+		keyName := fmt.Sprintf("100-%d", i)
+		if _, exists := previouslyCreatedKeys[keyName]; exists {
+			fmt.Printf("Match found for key %q. Skipping creation. Previously created keys: %v\n", keyName, previouslyCreatedKeys)
+			continue
+		}
+
 		//preparing request body
 		body := map[string]interface{}{
-			"name":                   fmt.Sprintf("100-%d", i),
+			"name":                   keyName,
 			"subuser_id":             "6be455ff-b99a-11f0-9174-7cc255e513e2",
 			"rdns":                   "u4c4.or.idrivee2-50.com",
 			"permissions":            2,
@@ -47,7 +56,7 @@ func main() {
 		resp, err := client.Do(req)
 
 		if err != nil {
-			fmt.Println("Request %d failed: %v\n", i, err)
+			fmt.Printf("Request %d failed: %v\n", i, err)
 			continue
 		}
 
@@ -75,16 +84,17 @@ func main() {
 
 		//if !userOk || !passOk {
 		if result.RespCode != 0 || result.Data.User == "" || result.Data.Pass == "" {
-			fmt.Println("Missing fields in response for key %d: %s\n", i, string(respData))
+			fmt.Printf("Missing fields in response for key %d: %s\n", i, string(respData))
 			time.Sleep(2 * time.Second)
 			continue
 		}
 
 		//Write to file line
-		line := fmt.Sprintf("generated key %d: %s\n", result.Data.User, result.Data.Pass)
+		line := fmt.Sprintf("generated key %s: %s\n", result.Data.User, result.Data.Pass)
 
 		file.WriteString(line)
-		fmt.Println("Generated key %d: %s\n", i, line)
+		previouslyCreatedKeys[keyName] = struct{}{}
+		fmt.Printf("Generated key %d: %s\n", i, line)
 	}
 	fmt.Println("100 keys generated and saved to output_keys.txt")
 }
