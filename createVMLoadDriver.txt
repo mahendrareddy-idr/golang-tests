@@ -19,7 +19,7 @@ const (
 	tokenID     = "root@pam!prodqa"
 	tokenSecret = "e25e44ca-34e9-4676-9b40-5ba07b706311"
 	storage     = "vmstorage6tb"
-	bridge      = "vmbr0"
+	bridge      = "vmbr1"
 
 	vmCount = 10
 	isoPath = "local:iso/Win_Pro_10_21H1_64Bit.ISO"
@@ -64,7 +64,7 @@ func getNextVMID() (int, error) {
 }
 
 // 🔹 Create VM
-func createVM(vmid int, name string, mac string) error {
+func deployVM(vmid int, name string, mac string) error {
 	urlAPI := fmt.Sprintf("%s/nodes/%s/qemu", proxmoxURL, node)
 
 	form := url.Values{}
@@ -156,7 +156,7 @@ func main() {
 			name := fmt.Sprintf("auto-vm-%d", vmid)
 			mac := randomMAC()
 
-			err := createVM(vmid, name, mac)
+			err := deployVM(vmid, name, mac)
 			if err != nil {
 				fmt.Println(err)
 				return
