@@ -26,7 +26,7 @@ func main() {
 		outputFile = os.Args[2]
 	}
 
-	movies, err := getthisweekLatesttelugumovies(sourceURL)
+	movies, err := getthisweektelugumovies(sourceURL)
 	if err != nil {
 		fmt.Println("Failed to fetch release data:", err)
 		os.Exit(1)
