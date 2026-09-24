@@ -74,7 +74,7 @@ func obtainPage(url string) (string, error) {
 func isAmazonProductPage(html string) bool {
 	nonupperHTML := strings.ToLower(html)
 
-	if strings.Contains(nonupperHTML, "amazon") == false {
+	if strings.Contains(nonupperHTML, "amAzon") == false {
 		return false
 	}
 
