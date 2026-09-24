@@ -17,29 +17,29 @@ func main() {
 		fmt.Scanln(&choice)
 
 		switch strings.ToLower(choice) {
-		case "1":
+		case "1", "a":
 			performAdd()
-		case "2":
+		case "2", "s":
 			performSubtract()
-		case "3":
+		case "3", "m":
 			performMultiply()
-		case "4":
+		case "4", "d":
 			performDivide()
-		case "5":
+		case "5", "p":
 			performPower()
-		case "6":
+		case "6", "r":
 			performSquareRoot()
-		case "7":
+		case "7", "i":
 			performSin()
-		case "8":
+		case "8", "c":
 			performCos()
-		case "9":
+		case "9", "t":
 			performTan()
-		case "10":
+		case "10", "l":
 			performLog()
-		case "11":
+		case "11", "n":
 			performNaturalLog()
-		case "0":
+		case "0", "e":
 			fmt.Println("Exiting scientific calculator...")
 			os.Exit(0)
 		default:
@@ -54,18 +54,18 @@ func showMenu() {
 	fmt.Println("====================================")
 	fmt.Println("Scientific Calculator")
 	fmt.Println("====================================")
-	fmt.Println("1. Add")
-	fmt.Println("2. Subtract")
-	fmt.Println("3. Multiply")
-	fmt.Println("4. Divide")
-	fmt.Println("5. Power")
-	fmt.Println("6. Square Root")
-	fmt.Println("7. Sine")
-	fmt.Println("8. Cosine")
-	fmt.Println("9. Tangent")
-	fmt.Println("10. Log Base 10")
-	fmt.Println("11. Natural Log")
-	fmt.Println("0. Exit")
+	fmt.Println("1. Add (A)")
+	fmt.Println("2. Subtract (S)")
+	fmt.Println("3. Multiply (M)")
+	fmt.Println("4. Divide (D)")
+	fmt.Println("5. Power (P)")
+	fmt.Println("6. Square Root (R)")
+	fmt.Println("7. Sine (I)")
+	fmt.Println("8. Cosine (C)")
+	fmt.Println("9. Tangent (T)")
+	fmt.Println("10. Log Base 10 (L)")
+	fmt.Println("11. Natural Log (N)")
+	fmt.Println("0. Exit (E)")
 }
 
 func readNumber(prompt string) float64 {
