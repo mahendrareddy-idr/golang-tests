@@ -19,7 +19,7 @@ func main() {
 
 	url := os.Args[1]
 
-	launched, err := checkAmazonMobileBegin(url)
+	launched, err := checkAmazonMobileStart(url)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
@@ -30,6 +30,10 @@ func main() {
 	} else {
 		fmt.Println("Mobile is not launched on Amazon.")
 	}
+}
+
+func checkAmazonMobileStart(productURL string) (bool, error) {
+	return checkAmazonMobileBegin(productURL)
 }
 
 func checkAmazonMobileBegin(productURL string) (bool, error) {
@@ -43,6 +47,10 @@ func checkAmazonMobileBegin(productURL string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func fetchPage(url string) (string, error) {
+	return obtainPage(url)
 }
 
 func obtainPage(url string) (string, error) {
@@ -74,7 +82,7 @@ func obtainPage(url string) (string, error) {
 func isAmazonProductPage(html string) bool {
 	nonupperHTML := strings.ToLower(html)
 
-	if strings.Contains(nonupperHTML, "amAzon") == false {
+	if strings.Contains(nonupperHTML, "amazon") == false {
 		return false
 	}
 
