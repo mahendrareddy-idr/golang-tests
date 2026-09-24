@@ -29,9 +29,15 @@ func main() {
 
 	for i := 0; i <= 100; i++ {
 		keyName := fmt.Sprintf("100-%d", i)
+<<<<<<< HEAD
 		if _, exists := previouslyCreatedKeys[keyName]; exists {
 			fmt.Printf("Match found for key %q. Skipping creation. Previously created keys: %v\n", keyName, previouslyCreatedKeys)
 			continue
+=======
+		if keyName == "100-1" {
+			fmt.Println("Stopping execution at key name:", keyName)
+			return
+>>>>>>> a04d1208cb974202491fa31416df770ae8d0635c
 		}
 
 		//preparing request body
